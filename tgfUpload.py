@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import urllib.request
 import platform
 
 from datetime import date
@@ -12,6 +13,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from time import sleep
+
+import Scrapper
+
 
 # Helper Methods
 def explicitWaitClick(Path, TextToBePresent):
@@ -51,10 +55,18 @@ explicitWaitClick("//a[contains(@href,'/create/items/photograph')]","Photograph"
 # Drag and drop photo
 explicitWaitText("dz-prev-text","Drag and drop your item into this box")
 # Get and upload Image
-browser.find_element(By.ID,"image_file_original").send_keys(os.getcwd()+"\media\sloth.jpg")
-browser.find_element(By.ID,"image_description_short").send_keys("Automated Image Upload")
-browser.find_element(By.ID,"image_location").send_keys("Inside my Computer")
+url = input("url of the image: ")
+name = input("name of the file to be saved as: ")
+ImageScrapper = Scrapper.imageScrapper(url,name,"media\\")
+ImageScrapper.saveImage()
+browser.find_element(By.ID,"image_file_original").send_keys(os.getcwd()+"\\"+str(ImageScrapper.fullPath))
+browser.find_element(By.ID,"image_description_short").send_keys(input("Short description: "))
+browser.find_element(By.ID,"image_location").send_keys(input("Image Source: "))
 browser.find_element(By.ID,"image_authoring_date").send_keys(str(date.today()))
+tags = input("Input tag(s) of the image seperated using space: ").split()
+for tag in tags:  
+    browser.find_element(By.ID,"new_tag").send_keys(tag)
+    browser.find_element(By.ID,"create_new_tag").click()
 browser.find_element(By.ID,"new_tag").send_keys("automation")
 browser.find_element(By.ID,"create_new_tag").click()
 browser.find_element(By.XPATH,"//input[@value='Create item']").click()
@@ -63,9 +75,9 @@ try:
     element = WebDriverWait(browser,30).until(EC.presence_of_element_located((By.XPATH,"/html/body/div[1]/div[1]/form/div/div[2]/div[3]/div[2]/div/div")))
 except:
     print("Unable to reach the page")
-browser.find_element(By.ID,"image_description").send_keys("This item was uploaded completely using automation and a python script. The human only contributed in writing the script.")
-browser.find_element(By.ID,"image_subject").send_keys("Automation")
-browser.find_element(By.ID,"image_author").send_keys("Python")
+browser.find_element(By.ID,"image_description").send_keys(input("Image description: "))
+browser.find_element(By.ID,"image_subject").send_keys(input("Image subject: "))
+browser.find_element(By.ID,"image_author").send_keys("Python + " + input("Author: "))
 osPlat = platform.system()
 browser.find_element(By.ID,"image_source").send_keys(osPlat)
 browser.find_element(By.XPATH,"/html/body/div[1]/div[1]/form/div/div[3]/div/div[1]/label[1]/div").click()
